@@ -1,0 +1,80 @@
+
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+);
+camera.position.set(4,4,6)
+camera.lookAt(0,0,0);
+
+const renderer = new THREE.WebGLRenderer({antialias:true})
+renderer.setSize(innerWidth, innerHeight)
+document.body.appendChild(renderer.domElement)
+
+const control = new OrbitControls(camera, renderer.domElement);
+
+//dyshemen(plane)
+
+const n = new THREE.Vector3(0,1,0)
+const p0 = new THREE.Vector3(0,0,0)
+const d =  n.dot(p0);
+
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(12,12),
+    new THREE.MeshBasicMaterial({color:0x2a3140})
+)
+
+floor.rotation.x = -Math.PI /2
+floor.updateMatrixWorld(true)
+
+scene.add(floor, new THREE.GridHelper(12,12))
+
+
+//rreze
+
+const o = new THREE.Vector3(2,5,1)
+const dir = new THREE.Vector3(0.3,-1,0.1).normalize();
+//formula
+const t = (d-n.dot(o))/n.dot(dir)
+const hit = o.clone().addScaledVector(dir,t)
+
+//vizatimi rezs
+scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([o, hit]),
+    new THREE.LineBasicMaterial({ color: 0xff4422 })
+));
+
+//vizualizimi i nderprerjes
+const dot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18),
+    new THREE.MeshBasicMaterial({color:0xffd700}),
+
+)
+dot.position.copy(hit);
+scene.add(dot)
+
+
+
+//krahasim me Raycaster
+const rcHit = new THREE.Raycaster(o,dir).intersectObject(floor)[0]
+console.log('Formula jone:',hit.toArray().map(x=>x,toFixed(3)))
+console.log('Ray Caster:',rcHit.point.toArray().map(x=>x,toFixed(3)))
+
+
+function animate(){        
+    requestAnimationFrame(animate)
+    control.update;
+    renderer.render(scene,camera);
+}
+animate()
+
+
+
